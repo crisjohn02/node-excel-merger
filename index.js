@@ -4,8 +4,8 @@ const parser = require('./utils/parser');
 const _ = require('lodash');
 const XLSX = require('xlsx');
 
-// node index 
-console.log(__dirname)
+// node index D:/Codes/NodeJS/merger/base D:/Codes/NodeJS/merger/target D:/output.xlsx
+
 
 const args = process.argv.slice(2);
 
