@@ -5,7 +5,8 @@ function parseData(filepath) {
     return new Promise((resolve, reject) => {
         csv({
             noheader: true,
-            output: 'csv'
+            output: 'csv',
+            // checkType: true
         })
         .fromFile(filepath)
         .then((result) => {

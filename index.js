@@ -46,18 +46,27 @@ let base_data = [];
 let target_data = [];
 
 async function loadBaseData(file) {
-    let data = await parser(path.join(base_folder, file));
-    return indexing(data, 'Respondent ID', path.parse(file).name);
+    let data = await valuesToNumber(await parser(path.join(base_folder, file)));
+    return indexing(data, 'ID', path.parse(file).name);
 }
 
 async function loadTargets() {
     let target_data = [];
     for (const file of target_files) {
-        let data = await parser(path.join(target_folder, file));
-        d = indexing(data, 'Participant ID', path.parse(file).name);
+        let data = await valuesToNumber(await parser(path.join(target_folder, file)));
+        d = indexing(data, 'ID', path.parse(file).name);
         target_data.push(d);
     }
     return target_data;
+}
+
+async function valuesToNumber(values) {
+    return _.map(values, (v) => {
+        return _.map(v, (vv) => {
+            return vv.length === 0 ? vv : (isNaN(vv) ? vv : Number(vv));
+        });
+        
+    });
 }
 
 async function merge(base, targets) {
