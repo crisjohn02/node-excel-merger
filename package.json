@@ -12,6 +12,7 @@
   "dependencies": {
     "csvtojson": "^2.0.10",
     "lodash": "^4.17.21",
-    "xlsx": "https://cdn.sheetjs.com/xlsx-0.19.1/xlsx-0.19.1.tgz"
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.19.1/xlsx-0.19.1.tgz",
+    "yargs": "^17.6.2"
   }
 }

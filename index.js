@@ -4,18 +4,27 @@ const parser = require('./utils/parser');
 const _ = require('lodash');
 const XLSX = require('xlsx');
 
-// node index D:/Codes/NodeJS/merger/base D:/Codes/NodeJS/merger/target D:/output.xlsx
+const yargs = require('yargs');
+const { hideBin } = require('yargs/helpers');
+const argv = yargs(hideBin(process.argv)).argv
 
+// node index --basec=base_column --targetc=target_column --base=base_folder --target=target_folder --output=output_file_path --type=excel_type (csv, xlsx)
 
-const args = process.argv.slice(2);
 
 
 let target_folder, base_folder, output_file;
-base_folder = args[0] || 'base';
-target_folder = args[1] || 'target';
-output_file = args[2] || 'output/output.xlsx';
+base_folder = argv.base || 'base';
+target_folder = argv.target || 'target';
+output_file = argv.output || 'output/output';
+
+const base_column = argv.basec || 'ID';
+const target_column = argv.targetc || 'ID';
+const output_filetype = argv.type || 'xlsx';
+
+console.log(argv);
 
 
+// Convert target files to CSV before parsing
 let _tmp_targets = fs.readdirSync(path.join(target_folder));
 for (const t of _tmp_targets) {
     if (path.extname(t) !== '.csv') {
@@ -27,7 +36,8 @@ for (const t of _tmp_targets) {
 }
 
 let _tmp_base = fs.readdirSync(path.join(base_folder));
-let tmp_file = _tmp_base[0]
+let tmp_file = _tmp_base[0];
+
 if (path.extname(tmp_file) !== '.csv') {
     // convert base excel to csv
     const wb = XLSX.readFile(path.join(base_folder, tmp_file));
@@ -45,21 +55,24 @@ const target_files = fs.readdirSync(path.join(target_folder));
 let base_data = [];
 let target_data = [];
 
+// Load the base excel file datasets
 async function loadBaseData(file) {
     let data = await valuesToNumber(await parser(path.join(base_folder, file)));
-    return indexing(data, 'ID', path.parse(file).name);
+    return indexing(data, base_column, path.parse(file).name);
 }
 
+// Load the target excel files data sets
 async function loadTargets() {
     let target_data = [];
     for (const file of target_files) {
         let data = await valuesToNumber(await parser(path.join(target_folder, file)));
-        d = indexing(data, 'ID', path.parse(file).name);
+        d = indexing(data, target_column, path.parse(file).name);
         target_data.push(d);
     }
     return target_data;
 }
 
+// Check the cell value type and if it's a number then convert to number else just the value as is
 async function valuesToNumber(values) {
     return _.map(values, (v) => {
         return _.map(v, (vv) => {
@@ -69,6 +82,7 @@ async function valuesToNumber(values) {
     });
 }
 
+// Merge the data sets usin the defined key
 async function merge(base, targets) {
     let result = [];
     for (const b of base) {
@@ -90,9 +104,10 @@ async function merge(base, targets) {
     const workbook = XLSX.utils.book_new();
 
     XLSX.utils.book_append_sheet(workbook, worksheet);
-    XLSX.writeFile(workbook, path.join(output_file), {compression: true});
+    XLSX.writeFile(workbook, path.join(output_file + '.' + output_filetype), {compression: true});
 }
 
+// Format header adding the filename
 function formatHeaders() {
     return headers_list.map((value, key) => {
         value[0] = value[0] + ' - ' + files_list[key];
@@ -100,6 +115,7 @@ function formatHeaders() {
     });
 }
 
+// Start the parsing ang merging
 async function start() {
     base_data = await loadBaseData(c_files[0]);
     target_data = await loadTargets();
@@ -108,6 +124,7 @@ async function start() {
 
 start();
 
+// Index the rows using the target/base column values
 function indexing(data, index, filename) {
     let header = _.head(data);
     headers_list.push(header);
