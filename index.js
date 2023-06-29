@@ -3,6 +3,7 @@ const path = require('path');
 const parser = require('./utils/parser');
 const _ = require('lodash');
 const XLSX = require('xlsx');
+const { orderBy } = require('natural-orderby');
 
 const yargs = require('yargs');
 const { hideBin } = require('yargs/helpers');
@@ -64,7 +65,8 @@ async function loadBaseData(file) {
 // Load the target excel files data sets
 async function loadTargets() {
     let target_data = [];
-    for (const file of target_files) {
+    let natsorted_target_files = orderBy(target_files);
+    for (const file of natsorted_target_files) {
         let data = await valuesToNumber(await parser(path.join(target_folder, file)));
         d = indexing(data, target_column, path.parse(file).name);
         target_data.push(d);
